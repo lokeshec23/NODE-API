@@ -1,8 +1,12 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const users = require("./models/usersModel");
+const cors = require("cors");
 const app = express();
 const port = 3000;
+
+// Enable CORS for all routes
+app.use(cors());
 
 //Connect to Database
 mongoose
@@ -27,6 +31,7 @@ app.post("/users", async (req, res) => {
   try {
     const user = await users.create(req.body);
     res.status(200).json(user);
+    console.log(`user info post successfully, ${user}`)
   } catch (error) {
     console.log(`Error while post users :(, ${error.message}`);
     res.status(500).json({ message: error.message });
@@ -45,11 +50,16 @@ app.get("/users", async (req, res) => {
 });
 
 // To get only one user details
-app.get("/users/:id", async (req, res) => {
+app.get("/users/:email", async (req, res) => {
   try {
-    const { id } = req.params;
-    const user = await users.findById(id);
-    res.status(200).json({ user });
+    const { email } = req.params;
+    const user = await users.findOne({ email: email });
+    if (user) {
+      res.status(200).json({ user });
+      console.log(`user info fetch successfully, ${user}`)
+    } else {
+      res.status(404).json({ message: "User not found" });
+    }
   } catch (error) {
     console.log(`Error while post users :(, ${error.message}`);
     res.status(500).json({ message: error.message });
